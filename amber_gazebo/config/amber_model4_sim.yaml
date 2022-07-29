@@ -1,0 +1,104 @@
+amber_leftarm:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - j1_left
+    - j2_left
+    - j3_left
+    - j4_left
+    - j5_left
+  gains:
+    j1_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j2_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j3_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j4_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j5_left: {p: 100.0, i: 0.0, d: 0.01, i_clamp: 1}
+  constraints:
+    goal_time: 3.0
+  state_publish_rate: 25
+
+amber_rightarm:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - j1_right
+    - j2_right
+    - j3_right
+    - j4_right
+    - j5_right
+  gains:
+    j1_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j2_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j3_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j4_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j5_right: {p: 100.0, i: 0.0, d: 0.01, i_clamp: 1}
+  constraints:
+    goal_time: 3.0
+  state_publish_rate: 25
+
+amber_lefthand:
+  type: effort_controllers/GripperActionController
+  publish_rate: 250
+  joint: j6_left_a
+  joints:
+    - j6_left_a
+    - j6_left_b
+  action_monitor_rate: 10
+  state_publish_rate:  100
+  stall_velocity_threshold: 0.01
+  goal_tolerance: 0.2
+  stall_timeout: 0.3
+  gains:
+    j6_left_a: {p: 1000, d: 10.0, i: 0.01, i_clamp: 1}
+    j6_left_b: {p: 1000, d: 10.0, i: 0.01, i_clamp: 1}
+
+amber_righthand:
+  type: effort_controllers/GripperActionController
+  publish_rate: 250
+  joint: j6_right_a
+  joints:
+    - j6_right_a
+    - j6_right_b
+  action_monitor_rate: 10
+  state_publish_rate:  100
+  stall_velocity_threshold: 0.01
+  goal_tolerance: 0.2
+  stall_timeout: 0.3
+  gains:
+    j6_right_a: {p: 1000, d: 10.0, i: 0.01, i_clamp: 1}
+    j6_right_b: {p: 1000, d: 10.0, i: 0.01, i_clamp: 1}
+
+left_tip_a_controller:
+  type: effort_controllers/JointPositionController
+  joint: j6_left_a
+  pid: {p: 70, d: 0.0, i: 0.01, i_clamp: 1}
+
+right_tip_a_controller:
+  type: effort_controllers/JointPositionController
+  joint: j6_right_a
+  pid: {p: 70, d: 0.0, i: 0.01, i_clamp: 1}
+
+left_tip_b_controller:
+  type: effort_controllers/JointPositionController
+  joint: j6_left_b
+  pid: {p: 70, d: 0.0, i: 0.01, i_clamp: 1}
+
+right_tip_b_controller:
+  type: effort_controllers/JointPositionController
+  joint: j6_right_b
+  pid: {p: 70, d: 0.0, i: 0.01, i_clamp: 1}
+
+gazebo_controll:
+  pid_gains:
+    j1_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j2_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j3_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j4_right: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j5_right: {p: 100.0, i: 0.0, d: 0.01, i_clamp: 1}
+    j6_right_a: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j6_right_b: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j1_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j2_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j3_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j4_left: {p: 1000.0, i: 0.01, d: 10.0, i_clamp: 1}
+    j5_left: {p: 100.0, i: 0.0, d: 0.01, i_clamp: 1}
+    j6_left_a: {p: 1000.0, i: 10.0, d: 0.01, i_clamp: 1}
+    j6_left_b: {p: 1000.0, i: 10.0, d: 0.01, i_clamp: 1}

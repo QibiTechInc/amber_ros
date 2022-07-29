@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="gui" default="true" />
+
+  <include file="$(find amber_description)/launch/amber_upload.launch" />
+
+  <param name="use_gui" value="$(arg gui)"/>
+  <node if="$(arg gui)" name="joint_state_publisher"
+        pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <node unless="$(arg gui)" name="joint_state_publisher"
+        pkg="joint_state_publisher" type="joint_state_publisher" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+        type="robot_state_publisher" />
+
+  <node name="rviz" pkg="rviz"
+        type="rviz"
+        args="-d $(find amber_description)/launch/amber.rviz" required="true" />
+
+  <node pkg="tf" type="static_transform_publisher" name="link5_right_to_right_tcp"
+        args="0.075 0 0.0 0 0 0 hand_right tcp_right 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="link5_left_to_left_tcp"
+        args="0.075 0 0.0 0 0 0 hand_left tcp_left 100" />
+</launch>

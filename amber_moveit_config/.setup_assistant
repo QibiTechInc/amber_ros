@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: amber_description
+    relative_path: urdf/amber_model4_hw.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/amber_model4.srdf
+  CONFIG:
+    author_name: qibitech
+    author_email: t.ueda@qibitech.com
+    generated_timestamp: 1647610069

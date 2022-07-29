@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="hr4c" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Transmission macro -->
+  <xacro:macro name="SimpleTransmissionPosition" params="joint n">
+    <transmission name="tran${n}">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${joint}">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor${n}">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <!-- Transmission macro -->
+  <xacro:macro name="SimpleTransmissionEffort" params="joint n">
+    <transmission name="tran${n}">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${joint}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor${n}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:SimpleTransmissionPosition n="1" joint="j1_right" />
+  <xacro:SimpleTransmissionPosition n="2" joint="j2_right" />
+  <xacro:SimpleTransmissionPosition n="3" joint="j3_right" />
+  <xacro:SimpleTransmissionPosition n="4" joint="j4_right" />
+  <xacro:SimpleTransmissionPosition n="5" joint="j5_right" />
+  <xacro:SimpleTransmissionEffort n="6" joint="j6_right_a" />
+  <xacro:SimpleTransmissionEffort n="7" joint="j6_right_b" />
+  <xacro:SimpleTransmissionPosition n="8" joint="j1_left" />
+  <xacro:SimpleTransmissionPosition n="9" joint="j2_left" />
+  <xacro:SimpleTransmissionPosition n="10" joint="j3_left" />
+  <xacro:SimpleTransmissionPosition n="11" joint="j4_left" />
+  <xacro:SimpleTransmissionPosition n="12" joint="j5_left" />
+  <xacro:SimpleTransmissionEffort n="13" joint="j6_left_a" />
+  <xacro:SimpleTransmissionEffort n="14" joint="j6_left_b" />
+
+</robot>
+
+

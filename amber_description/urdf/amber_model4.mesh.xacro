@@ -1,0 +1,329 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:property name="camera_angle" value="0.5" />
+
+    <link name="world"/>
+    <joint name="world_to_body" type="fixed" >
+	<parent link="world" />
+	<child link="body" />
+    </joint>
+    <!-- body to shoulders -->
+    <link name="body" >
+         <visual>
+             <origin xyz="0 0 0" rpy="0 0 0"/>
+             <geometry>
+                 <mesh filename="package://amber_description/meshes/model4/body.stl" />
+             </geometry>
+             <material name="grey"/>
+         </visual>
+         <collision>
+             <origin xyz="0 0 0" rpy="0 0 0"/>
+             <geometry>
+                 <mesh filename="package://amber_description/meshes/model4/body.stl" />
+             </geometry>
+             <material name="grey"/>
+         </collision>
+         <inertial>
+           <origin xyz="0 0 0" />
+           <mass value="14.4" />
+	   <inertia ixx="0.9712" ixy="-2.221e-3" ixz="8.026e-2"
+                    iyy="1.351" iyz="-1.594e-3" izz="0.5901" />
+         </inertial>
+    </link>
+
+    <joint name="body_camera_mount" type="fixed">
+      <parent link="body" />
+      <child link="camera_mount" />
+	  <origin xyz="0.03 0.0 0.81" rpy="0 0 0" />
+    </joint>
+
+    <link name="camera_mount" >
+         <visual>
+             <origin xyz="0 0 0" rpy="0 0 0"/>
+             <geometry>
+                 <mesh filename="package://amber_description/meshes/model4/camera_mount_base.stl" />
+             </geometry>
+             <material name="grey"/>
+         </visual>
+         <collision>
+             <origin xyz="0 0 0" rpy="0 0 0"/>
+             <geometry>
+                 <mesh filename="package://amber_description/meshes/model4/camera_mount_base.stl" />
+             </geometry>
+             <material name="grey"/>
+         </collision>
+         <inertial>
+           <origin xyz="0 0 0" />
+           <mass value="0.252238" />
+	       <inertia ixx="1e-3" ixy="0" ixz="0"
+                    iyy="1e-3" iyz="0" izz="1e-3" />
+         </inertial>
+    </link>
+
+    <joint name="camera_mount_to_camera" type="fixed">
+      <parent link="camera_mount" />
+      <child link="camera" />
+	  <origin xyz="0.025 0.0 0.0" rpy="0 0 0" />
+    </joint>
+
+    <link name="camera" >
+         <visual>
+             <origin xyz="0 0 0" rpy="0 ${camera_angle} 0"/>
+             <geometry>
+                 <mesh filename="package://amber_description/meshes/model4/camera.stl" />
+             </geometry>
+             <material name="black"/>
+         </visual>
+         <collision>
+             <origin xyz="0 0 0" rpy="0 ${camera_angle} 0"/>
+             <geometry>
+                 <mesh filename="package://amber_description/meshes/model4/camera.stl" />
+             </geometry>
+             <material name="black"/>
+         </collision>
+         <inertial>
+           <origin xyz="0 0 0" />
+           <mass value="0.1" />
+	       <inertia ixx="1e-3" ixy="0" ixz="0"
+                    iyy="1e-3" iyz="0" izz="1e-3" />
+         </inertial>
+    </link>
+
+    <!-- manipulator -->
+    <xacro:macro name="manipulator" params="side y_unit j1_lower j1_upper" >
+        <joint name="${side}_shoulder" type="fixed">
+            <parent link="body" />
+            <child link="link1_${side}" />
+	    <origin xyz="-0.025 ${y_unit*(-0.15)} 0.72" rpy="0 0 0" />
+        </joint>
+        <link name="link1_${side}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link1_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link1_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="1.312" />
+	      <inertia ixx="5.845e-04" ixy="${y_unit*0.0}" ixz="0.0"
+                       iyy="5.845e-04" iyz="${y_unit*0.0}" izz="1.029e-3" />
+            </inertial>
+        </link>
+	<joint name="j1_${side}" type="revolute">
+            <parent link="link1_${side}" />
+            <child link="link2_${side}" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <axis xyz="0 0 1" />
+            <limit velocity="${2.0*pi}" effort="40" lower="${j1_lower}" upper="${j1_upper}" />
+        </joint>
+        <link name="link2_${side}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link2_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link2_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="3.469" />
+	      <inertia ixx="3.72e-4" ixy="${(-5.972e-5)*y_unit}" ixz="-1.428e-3"
+		  iyy="3.2715e-2" iyz="${(-3.908e-3)*y_unit}" izz="7.535e-3" />
+            </inertial>
+        </link>
+        <joint name="j2_${side}" type="revolute">
+            <parent link="link2_${side}" />
+            <child link="link3_${side}" />
+            <origin xyz="0 0 -0.1565" rpy="0 0 0" />
+            <axis xyz="0 1 0" />
+            <limit velocity="${2.0*pi}" effort="20" lower="${-0.222*pi}" upper="${0.277*pi}" />
+        </joint>
+        <link name="link3_${side}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link3_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link3_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="2.010" />
+	      <inertia ixx="2.265e-2" ixy="${y_unit*5.836e-4}" ixz="4.07e-4"
+                       iyy="2.329e-2" iyz="${y_unit*5.202e-4}" izz="1.054e-3" />
+            </inertial>
+        </link>
+        <joint name="j3_${side}" type="revolute">
+            <parent link="link3_${side}" />
+            <child link="link4_${side}" />
+            <origin xyz="0 0 -0.25" rpy="0 1.57 0" />
+            <axis xyz="0 1 0" />
+            <limit velocity="${2.0*pi}" effort="20" lower="${-1.57 - 0.333*pi}" upper="${-1.57 + 0.333*pi}" />
+        </joint>
+        <link name="link4_${side}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link4_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link4_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="0.7647" />
+	      <inertia ixx="1.9e-4" ixy="${(-1.417e-4)*y_unit}" ixz="2.745e-5"
+		  iyy="3.171e-2" iyz="${(1.1e-9)*y_unit}" izz="3.171e-2" />
+            </inertial>
+        </link>
+        <joint name="j4_${side}" type="revolute">
+            <parent link="link4_${side}" />
+            <child link="link5_${side}" />
+            <origin xyz="0.25 0 0" rpy="0 0 0" />
+            <axis xyz="0 1 0" />
+            <limit velocity="${2.0*pi}" effort="20" lower="${-0.5*pi}" upper="${0.5*pi}" />
+        </joint>
+        <link name="link5_${side}">
+            <visual>
+	        <origin xyz="0 ${y_unit*0.003} 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link5_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+	        <origin xyz="0 ${y_unit*0.003} 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/link5_${side}.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="0.5808" />
+	      <inertia ixx="1.693e-5" ixy="${-7.726e-4*y_unit}" ixz="3.695e-9"
+		  iyy="1.985e-3" iyz="${(-4.345e-10)*y_unit}" izz="2.035e-3" />
+            </inertial>
+        </link>
+        <joint name="j5_${side}" type="revolute">
+            <parent link="link5_${side}" />
+	    <child link="hand_${side}" />
+            <origin xyz="0.027 ${y_unit*0.003} 0" rpy="0 0 0" />
+            <axis xyz="1 0 0" />
+            <limit velocity="${2.0*pi}" effort="20" lower="${-1.0*pi}" upper="${1.0*pi}" />
+        </joint>
+	<link name="hand_${side}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/hand.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/hand.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="0.4628" />
+	      <inertia ixx="1.549e-4" ixy="${(3.04e-5)*y_unit}" ixz="2.771e-6"
+		  iyy="3.529e-4" iyz="${(-4.112e-6)*y_unit}" izz="4.07e-4" />
+            </inertial>
+        </link>
+        <joint name="j6_${side}_a" type="revolute">
+            <parent link="hand_${side}" />
+	    <child link="tip_${side}_a" />
+	    <origin xyz="0.029 -0.0305 0" rpy="0 0 0" />
+            <axis xyz="0 0 1" />
+            <limit velocity="${2.0*pi}" effort="20" lower="${-0.5*pi}" upper="${0.166*pi}" />
+        </joint>
+	<link name="tip_${side}_a">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/tip.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/tip.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="0.0897" />
+	      <inertia ixx="2.79e-5" ixy="${(-1.58e-10)*y_unit}" ixz="1.84e-7"
+		  iyy="2.138e-4" iyz="0.0" izz="1.883e-4" />
+            </inertial>
+        </link>
+        <joint name="j6_${side}_b" type="revolute">
+            <parent link="hand_${side}" />
+	    <child link="tip_${side}_b" />
+	    <origin xyz="0.029 0.0305 0" rpy="${pi} 0 0" />
+            <axis xyz="0 0 1" />
+            <limit velocity="${2.0*pi}" effort="20" lower="${-0.5*pi}" upper="${0.166*pi}" />
+        </joint>
+	<link name="tip_${side}_b">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/tip.stl" />
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://amber_description/meshes/model4/tip.stl" />
+                </geometry>
+                <material name="grey"/>
+            </collision>
+            <inertial>
+              <origin xyz="0 0 0" />
+              <mass value="0.0897" />
+	      <inertia ixx="2.79e-5" ixy="${(-1.58e-10)*y_unit}" ixz="1.84e-7"
+		  iyy="2.138e-4" iyz="0.0" izz="1.883e-4" />
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <xacro:manipulator side="right" y_unit="1.0" j1_lower="${-0.666*pi}" j1_upper="${0.277*pi}" />
+    <xacro:manipulator side="left" y_unit="-1.0" j1_lower="${-0.277*pi}" j1_upper="${0.666*pi}" />
+
+</robot>

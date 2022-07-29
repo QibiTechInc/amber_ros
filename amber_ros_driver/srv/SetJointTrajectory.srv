@@ -1,0 +1,8 @@
+int8 LINEAR=0
+int8 MINJERK=1
+float64[] target_angles
+float64 goal_time
+int8[] mask
+int8 interpolation_method
+bool relative
+---

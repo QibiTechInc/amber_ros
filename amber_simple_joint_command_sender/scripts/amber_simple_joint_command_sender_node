@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import rospy
+from amber_simple_joint_command_sender.amber_simple_joint_command_sender_node import AmberSimpleJointCommandSenderNode
+
+try:
+    asjcs_node = AmberSimpleJointCommandSenderNode()
+    asjcs_node.run()
+except rospy.ROSInterruptException:
+    pass

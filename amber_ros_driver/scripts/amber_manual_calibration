@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+import time
+from amber_ros_driver.amber_driver import AmberDriver
+from amber_ros_driver.hr4c_comm import HR4CCOM
+
+
+class InteractiveCalibration(object):
+    def __init__(self, ipaddr, lr):
+        port = 54321
+        self._amber_driver = AmberDriver(HR4CCOM(), ipaddr, port)
+        self._lr = lr
+
+        # キャリブレーションオフセット
+        # J1: 内, J2: 奥, J3: J2奥で折りたたむ
+        if lr == 'r':
+            self._calib_list = [0.924, 0.70596, -2.6647]
+        else:
+            self._calib_list = [-0.924, 0.70596, -2.6647]
+
+    def _make_red_text(self, txt):
+        return '\033[31m' + txt + '\033[0m'
+
+    def print_red(self, txt):
+        print(self._make_red_text(txt))
+
+    def run(self):
+        print("start manual calibration")
+
+        # サーボオフ
+        self._amber_driver.servo_all_off()
+
+        # alarm reset
+        print("alarm reset")
+        for i in range(3):
+            self._amber_driver.alarm_reset(i)
+
+        self.print_red("After setting calibration pose for j1/j2, please enter Ctrl-C\n")
+        j1_angle_list = []
+        j2_angle_list = []
+        while True:
+            try:
+                angles = self._amber_driver.get_joint_angle()
+                j1_angle_list.append(angles[0])
+                j2_angle_list.append(angles[1])
+                time.sleep(0.01)
+            except KeyboardInterrupt:
+                break
+
+        if self._lr == 'r':
+            memory_angle_j1 = max(j1_angle_list)
+        else:
+            memory_angle_j1 = min(j1_angle_list)
+        memory_angle_j2 = max(j2_angle_list)
+
+        print("j1/j2 calibration start")
+        self._amber_driver.calibrate_joint_from_memory(0,
+                                                       self._calib_list[0],
+                                                       memory_angle_j1)
+        self._amber_driver.calibrate_joint_from_memory(1,
+                                                       self._calib_list[1],
+                                                       memory_angle_j2)
+        print("j1/j2 calibration end")
+
+        self.print_red("After setting calibration pose for j3, please enter Ctrl-C\n")
+        j3_angle_list = []
+        while True:
+            try:
+                angles = self._amber_driver.get_joint_angle()
+                j3_angle_list.append(angles[2])
+                time.sleep(0.02)
+            except KeyboardInterrupt:
+                break
+
+        memory_angle_j3 = min(j3_angle_list)
+
+        print("j3 calibration start")
+        self._amber_driver.calibrate_joint_from_memory(2,
+                                                       self._calib_list[2],
+                                                       memory_angle_j3)
+        print("j3 calibration end")
+
+        # 位置制御モード
+        self._amber_driver.set_control_mode([1, 1, 1, 1, 1, 1, 1])
+
+        print("finish manual calibration")
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print("Usage: rosrun amber_ros_driver amber_manual_calibration 172.16.1.101 r")
+    else:
+        calibrator = InteractiveCalibration(sys.argv[1], sys.argv[2])
+        calibrator.run()

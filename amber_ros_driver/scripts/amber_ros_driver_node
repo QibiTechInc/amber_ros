@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import rospy
+from amber_ros_driver.amber_ros_driver_node import AmberROSDriverNode
+
+try:
+    ard_node = AmberROSDriverNode()
+    rospy.on_shutdown(ard_node.shutdown)
+    ard_node.run()
+except rospy.ROSInterruptException:
+    pass

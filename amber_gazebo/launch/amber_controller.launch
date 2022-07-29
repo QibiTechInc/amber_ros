@@ -1,0 +1,21 @@
+<launch>
+  <arg name="model" default="amber_model4_sim"/>
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find amber_gazebo)/config/$(arg model).yaml" command="load"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+      output="screen" args="amber_leftarm
+                            amber_rightarm
+                            amber_lefthand
+                            amber_righthand
+                            " />
+
+   <!-- joint_state_controller -->
+   <rosparam file="$(find amber_gazebo)/config/joint_state_controller.yaml" command="load"/>
+   <node name="joint_state_controller_spawner" pkg="controller_manager" type="controller_manager"
+        args="spawn joint_state_controller" respawn="false" output="screen"/>
+   <!-- robot state publisher -->
+   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+</launch>

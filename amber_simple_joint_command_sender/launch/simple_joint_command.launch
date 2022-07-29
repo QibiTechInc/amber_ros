@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="amber_simple_joint_command_sender_node_left" output="screen"
+        pkg="amber_simple_joint_command_sender"
+        type="amber_simple_joint_command_sender_node" >
+    <param name="action_name" value="amber_leftarm/follow_joint_trajectory"/>
+    <param name="time_tolerance" value="0.1"/>
+    <remap from="simple_trajectory_command" to="amber_leftarm/simple_trajectory_command"/>
+  </node>
+
+  <node name="amber_simple_joint_command_sender_node_right" output="screen"
+        pkg="amber_simple_joint_command_sender"
+        type="amber_simple_joint_command_sender_node" >
+    <param name="action_name" value="amber_rightarm/follow_joint_trajectory"/>
+    <param name="time_tolerance" value="0.1"/>
+    <remap from="simple_trajectory_command" to="amber_rightarm/simple_trajectory_command"/>
+  </node>
+
+</launch>

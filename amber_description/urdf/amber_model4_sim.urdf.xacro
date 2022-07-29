@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<robot name="amber_model4" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- import gazebo setting -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4.gazebo.xacro" />
+    <!-- import materials -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4.materials.xacro" />
+    <!-- import transmission -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4_sim.transmission.xacro" />
+    <!-- import tree  -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4.mesh.xacro" />
+
+</robot>
+

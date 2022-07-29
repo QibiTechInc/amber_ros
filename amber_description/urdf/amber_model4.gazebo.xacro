@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot name="hr4c" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Gazebo Reference macro -->
+  <xacro:macro name="ref_link" params="ref">
+    <gazebo reference="${ref}">
+      <material>Gazebo/Grey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:ref_link ref="body"/>
+
+  <xacro:macro name="gazebo_ref" params="side" >
+      <xacro:ref_link ref="link1_${side}"/>
+      <xacro:ref_link ref="link2_${side}"/>
+      <xacro:ref_link ref="link3_${side}"/>
+      <xacro:ref_link ref="link4_${side}"/>
+      <xacro:ref_link ref="link5_${side}"/>
+      <xacro:ref_link ref="hand_${side}"/>
+      <xacro:ref_link ref="tip_${side}_a"/>
+      <xacro:ref_link ref="tip_${side}_b"/>
+  </xacro:macro>
+
+  <!-- World -->
+  <gazebo reference="world"/>
+  <xacro:gazebo_ref side="right" />
+  <xacro:gazebo_ref side="left" />
+
+  <!-- ros_control plugin -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <controlPeriod>0.001</controlPeriod>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+
+</robot>
+

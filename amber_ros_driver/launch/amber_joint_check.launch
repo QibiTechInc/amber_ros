@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find amber_ros_driver)/launch/amber_control.launch"/>
+  <node name="rviz" pkg="rviz"
+        type="rviz"
+        args="-d $(find amber_description)/launch/amber.rviz" required="true" />
+
+  <node pkg="tf" type="static_transform_publisher" name="link5_right_to_right_tcp"
+        args="0.075 0 0.0 0 0 0 hand_right tcp_right 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="link5_left_to_left_tcp"
+        args="0.075 0 0.0 0 0 0 hand_left tcp_left 100" />
+</launch>

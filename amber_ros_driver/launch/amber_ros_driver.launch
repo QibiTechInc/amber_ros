@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="joint_names_left" default="[j1_left, j2_left, j3_left, j4_left, j5_left, j6_left_a, j6_left_b]"/>
+  <arg name="joint_names_right" default="[j1_right, j2_right, j3_right, j4_right, j5_right, j6_right_a, j6_right_b]"/>
+
+  <group ns="amber_left">
+    <node name="amber_ros_driver_node_left" output="screen"
+          pkg="amber_ros_driver" type="amber_ros_driver_node" >
+      <param name="ip_addr" value="172.16.1.102"/>
+      <param name="port" value="54321"/>
+      <rosparam param="joint_names" subst_value="True">$(arg joint_names_left)</rosparam>
+      <param name="sampling_rate" value="100"/>
+    </node>
+  </group>
+
+  <group ns="amber_right">
+    <node name="amber_ros_driver_node_right" output="screen"
+          pkg="amber_ros_driver" type="amber_ros_driver_node" >
+      <param name="ip_addr" value="172.16.1.101"/>
+      <param name="port" value="54321"/>
+      <rosparam param="joint_names" subst_value="True">$(arg joint_names_right)</rosparam>
+      <param name="sampling_rate" value="100"/>
+    </node>
+  </group>
+
+  <node name="amber_action_server_node_left" output="screen"
+        pkg="amber_ros_driver" type="amber_action_server_node" >
+    <rosparam param="joint_names" subst_value="True">$(arg joint_names_left)</rosparam>
+    <param name="arm_trajectory_action_name" value="amber_leftarm/follow_joint_trajectory"/>
+    <param name="gripper_action_name" value="amber_lefthand/gripper_cmd"/>
+    <param name="gohome_action_name" value="amber_leftarm/go_to_home_position"/>
+    <param name="gorest_action_name" value="amber_leftarm/go_to_rest_position"/>
+    <param name="gripper_target_time" value="2.0"/>
+    <param name="service_namespace" value="amber_left"/>
+    <param name="sampling_rate" value="100"/>
+    <param name="gripper_close_offset" value="0.25"/>
+    <param name="gripper_adapt_time" value="0.2"/>
+    <param name="follow_mode" value="waypoint" />
+    <param name="moveit_control_rate" value="25.0" />
+    <param name="minimum_control_duration" value="1.0" />
+    <remap from="joint_states" to="/amber_left/joint_states" />
+    <remap from="joint_currents" to="/amber_left/joint_currents" />
+  </node>
+
+  <node name="amber_action_server_node_right" output="screen"
+          pkg="amber_ros_driver" type="amber_action_server_node" >
+    <rosparam param="joint_names" subst_value="True">$(arg joint_names_right)</rosparam>
+    <param name="arm_trajectory_action_name" value="amber_rightarm/follow_joint_trajectory"/>
+    <param name="gripper_action_name" value="amber_righthand/gripper_cmd"/>
+    <param name="gohome_action_name" value="amber_rightarm/go_to_home_position"/>
+    <param name="gorest_action_name" value="amber_rightarm/go_to_rest_position"/>
+    <param name="gripper_target_time" value="2.0"/>
+    <param name="service_namespace" value="amber_right"/>
+    <param name="sampling_rate" value="100"/>
+    <param name="gripper_close_offset" value="0.25"/>
+    <param name="gripper_adapt_time" value="0.2"/>
+    <param name="follow_mode" value="waypoint" />
+    <param name="moveit_control_rate" value="25.0" />
+    <param name="minimum_control_duration" value="1.0" />
+    <remap from="joint_states" to="/amber_right/joint_states" />
+    <remap from="joint_currents" to="/amber_right/joint_currents" />
+  </node>
+
+  <node name="amber_jointstates_integrator_node" output="screen"
+        pkg="amber_ros_driver" type="amber_jointstates_integrator_node" >
+    <param name="right_group_name" value="amber_right"/>
+    <param name="left_group_name" value="amber_left"/>
+    <param name="fps" value="100.0"/>
+  </node>
+
+</launch>

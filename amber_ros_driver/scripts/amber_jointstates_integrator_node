@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import rospy
+from amber_ros_driver.amber_jointstates_integrator_node import AmberJointStatesIntegratorNode
+
+
+try:
+    ajsi_node = AmberJointStatesIntegratorNode()
+    ajsi_node.run()
+except rospy.ROSInterruptException:
+    pass

@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<robot name="amber_model4" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- import materials -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4.materials.xacro" />
+    <!-- import transmission -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4_hw.transmission.xacro" />
+    <!-- import transmission -->
+    <xacro:include filename="$(find amber_description)/urdf/amber_model4.prim.xacro" />
+
+</robot>
+
+

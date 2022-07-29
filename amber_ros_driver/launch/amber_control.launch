@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="model" default="amber_model4_hw"/>
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <include file="$(find amber_description)/launch/amber_upload.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+  <include file="$(find amber_ros_driver)/launch/amber_ros_driver.launch"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+</launch>
