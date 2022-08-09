@@ -93,11 +93,12 @@ class AmberDriver(object):
 
     def set_control_mode(self, control_modes, no_check=False, retry_count=3):
         current_cmodes = self.get_control_mode()
+        target_cmodes = list(control_modes)
         try_count = retry_count + 1
 
         for i in range(try_count):
-            if current_cmodes != control_modes:
-                self._hr4c_comm.set_control_mode(self._dev, control_modes)
+            if current_cmodes != target_cmodes:
+                self._hr4c_comm.set_control_mode(self._dev, target_cmodes)
                 if no_check:
                     return
                 else:
