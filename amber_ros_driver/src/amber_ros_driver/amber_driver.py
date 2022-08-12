@@ -144,7 +144,7 @@ class AmberDriver(object):
 
     def set_joint_trajectory(self, goal_references, goal_time,
                              mask=None, relative=False,
-                             interpolation_method=MINJERK):
+                             interpolation_method=None):
         if interpolation_method is None:
             interpolation_method = self.MINJERK
 
@@ -206,28 +206,72 @@ class AmberDriver(object):
                                                     calibration_angle,
                                                     memory_angle)
 
+    def move_until_contact(self, joint_no, speed_ref, thres_current,
+                           thres_count=10, mask=None):
+        # 指定の関節を速度制御にする
+        control_mode = self.get_control_mode()
+        control_mode[joint_no] = 2
+        self.set_control_mode(control_mode, no_check=True)
+
+        # 指定の関節を速度制御で動かす
+        self.set_joint_trajectory(speed_ref,
+                                  1.0,
+                                  mask=mask)
+        self.wait_interpolation()
+
+        stop_mask = [1] * 6
+        stop_mask[joint_no] = 0
+        cnt = 0
+        while True:
+            try:
+                # 指定の関節の電流値が大きいと停止
+                current = self.get_joint_current()
+                time.sleep(0.01)
+                if abs(current[joint_no]) > thres_current:
+                    cnt += 1
+                if cnt > thres_count:
+                    self.set_joint_trajectory([0] * 6,
+                                              0.1,
+                                              mask=stop_mask)
+                    self.wait_interpolation()
+            except KeyboardInterrupt:
+                break
+            except BaseException:
+                break
+
     def go_to_home_position(self,
                             mode=[1, 1, 1, 1, 1, 1, 1],
                             goal_time=3.0,
                             servo_on=True,
-                            wait_interpolation=True):
-        home_pose = [0.0, -0.057, -2.4, 0.0, 0.0, 0.0, 0.0]
+                            wait_interpolation=True,
+                            mask=None):
+        home_pose = [0.0, -0.057, -2.3, 0.0, 0.0, 0.0, 0.0]
         self.set_control_mode(mode, no_check=True)
         time.sleep(0.2)
         if servo_on:
             self.servo_all_on()
             time.sleep(0.5)
-        self.set_joint_trajectory(home_pose, goal_time)
+        self.set_joint_trajectory(home_pose, goal_time, mask=mask)
         if wait_interpolation:
             self.wait_interpolation()
 
-    def go_to_rest_position(self, wait_interpolation=True):
-        self.set_control_mode([1, 3, 1, 1, 1, 1, 1], no_check=True)
-        self.set_joint_trajectory([0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0], 2.0, mask=[1, 0, 1, 1, 1])
-        if wait_interpolation:
-            self.wait_interpolation()
+    def go_to_rest_position(self,
+                            goal_time=3.0,
+                            servo_off=True,
+                            mask=None):
+        rest_pose = [0.0, 0.31, -1.9, 0.0, 0.0, 0.0, 0.0]
+        self.set_control_mode([1, 1, 1, 1, 1, 1, 1], no_check=True)
+        time.sleep(0.2)
+        self.set_joint_trajectory(rest_pose, goal_time, mask=mask)
+        self.wait_interpolation()
+
         self.set_control_mode([1, 3, 3, 1, 1, 1, 1], no_check=True)
-        time.sleep(0.1)
-        self.set_joint_trajectory([0.0, 2.0, -1.0, 0.0, 0.0, 0.0, 0.0], 3.0, mask=[1, 0, 0, 1, 1])
-        if wait_interpolation:
-            self.wait_interpolation()
+        time.sleep(0.2)
+        self.set_joint_trajectory([0.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0],
+                                  goal_time / 2.0,
+                                  interpolation_method=self.LINEAR,
+                                  mask=[1, 0, 0, 1, 1, 1, 1])
+        self.wait_interpolation()
+
+        if servo_off:
+            self.servo_all_off()
