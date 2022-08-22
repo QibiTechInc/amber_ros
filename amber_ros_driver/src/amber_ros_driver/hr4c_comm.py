@@ -93,6 +93,16 @@ class HR4CCOM(object):
         self._hr4c_comm_so.hr4capi_ping.argtypes = [c_int]
         self._hr4c_comm_so.hr4capi_update_controller.restype = c_int
         self._hr4c_comm_so.hr4capi_update_controller.argtypes = [c_int, c_char_p]
+        self._hr4c_comm_so.hr4capi_get_all_sensor_info.restype = None
+        self._hr4c_comm_so.hr4capi_get_all_sensor_info.argtypes = [c_int,
+                                                                   POINTER(c_double),
+                                                                   POINTER(c_double),
+                                                                   POINTER(c_double),
+                                                                   POINTER(c_double),
+                                                                   POINTER(c_int),
+                                                                   POINTER(c_int)]
+        self._hr4c_comm_so.hr4capi_enable_zerog_mode.restype = None
+        self._hr4c_comm_so.hr4capi_enable_zerog_mode.argtypes = [c_int, c_int]
 
     def set_dof(self, dof):
         self._dof = dof
@@ -191,3 +201,9 @@ class HR4CCOM(object):
                                                                joint_no,
                                                                calibration_angle,
                                                                memory_angle)
+
+    def enable_zerog_mode(self, dev, on_off):
+        if on_off:
+            self._hr4c_comm_so.hr4capi_enable_zerog_mode(dev, 1)
+        else:
+            self._hr4c_comm_so.hr4capi_enable_zerog_mode(dev, 0)

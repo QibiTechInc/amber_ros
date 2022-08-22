@@ -14,7 +14,7 @@ from amber_ros_driver.srv import (
 )
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import Empty, EmptyResponse, SetBool, SetBoolResponse
 
 
 class AmberROSDriverNode(object):
@@ -56,6 +56,7 @@ class AmberROSDriverNode(object):
         rospy.Service('set_control_mode', SetInt8Array, self.handle_set_control_mode)
         rospy.Service('get_control_mode', GetInt8Array, self.handle_get_control_mode)
         rospy.Service('set_joint_trajectory', SetJointTrajectory, self.handle_set_joint_trajectory)
+        rospy.Service('enable_zerog_mode', SetBool, self.handle_enable_zerog_mode)
 
     def shutdown(self):
         self._amber_driver.close_device()
@@ -114,6 +115,10 @@ class AmberROSDriverNode(object):
                                                 interpolation_method=req.interpolation_method,
                                                 relative=req.relative)
         return SetJointTrajectoryResponse()
+
+    def handle_enable_zerog_mode(self, req):
+        self._amber_driver.enable_zerog_mode(req.data)
+        return SetBoolResponse(success=True, message='')
 
     def publish_joint_state(self, angles, velocities, efforts):
         js = JointState()
