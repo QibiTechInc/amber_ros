@@ -218,7 +218,7 @@ class AmberDriver(object):
         self._hr4c_comm.enable_zerog_mode(self._dev, on_off)
 
     def move_until_contact(self, joint_no, speed_ref, thres_current,
-                           thres_count=10, mask=None):
+                           thres_count=50, mask=None):
         # 指定の関節を速度制御にする
         control_mode = self.get_control_mode()
         control_mode[joint_no] = 2
@@ -230,25 +230,29 @@ class AmberDriver(object):
                                   mask=mask)
         self.wait_interpolation()
 
-        stop_mask = [1] * 6
+        stop_mask = [1] * 7
         stop_mask[joint_no] = 0
         cnt = 0
+        joint_angle_list = []
         while True:
             try:
                 # 指定の関節の電流値が大きいと停止
+                joint_angle_list.append(self.get_joint_angle())
                 current = self.get_joint_current()
                 time.sleep(0.01)
                 if abs(current[joint_no]) > thres_current:
                     cnt += 1
                 if cnt > thres_count:
-                    self.set_joint_trajectory([0] * 6,
+                    self.set_joint_trajectory([0] * 7,
                                               0.1,
                                               mask=stop_mask)
                     self.wait_interpolation()
+                    return joint_angle_list
             except KeyboardInterrupt:
                 break
             except BaseException:
                 break
+        return None
 
     def go_to_home_position(self,
                             mode=[1, 1, 1, 1, 1, 1, 1],
