@@ -207,6 +207,9 @@ class AmberDriver(object):
                                                     memory_angle)
 
     def enable_zerog_mode(self, on_off):
+        # 制御モード変更よりも先に呼び出す必要あり
+        self._hr4c_comm.enable_zerog_mode(self._dev, on_off)
+
         if on_off:
             # 上腕の制御モードをトルク制御に変更
             cmode = self.get_control_mode()
@@ -214,8 +217,6 @@ class AmberDriver(object):
             cmode[1] = self.CONTROLMODE_TORQUE
             cmode[2] = self.CONTROLMODE_TORQUE
             self.set_control_mode(cmode)
-
-        self._hr4c_comm.enable_zerog_mode(self._dev, on_off)
 
     def move_until_contact(self, joint_no, speed_ref, thres_current,
                            thres_count=50, mask=None):
