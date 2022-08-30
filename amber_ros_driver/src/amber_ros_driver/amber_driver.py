@@ -291,3 +291,53 @@ class AmberDriver(object):
 
         if servo_off:
             self.servo_all_off()
+
+    def close_hand_until_contact(self,
+                                 close_angle=0.5,
+                                 close_time=3.0,
+                                 close_offset=0.3,
+                                 contact_current=0.5):
+        start_currents = self._get_current_average(1.0)
+        self.set_joint_trajectory(
+            [0.0, 0.0, 0.0, 0.0, 0.0, close_angle, close_angle],
+            close_time,
+            mask=[1, 1, 1, 1, 1, 0, 0],
+            interpolation_method=self.MINJERK,
+            relative=False
+        )
+        start_time = rospy.Time.now()
+        diff_c = [i-j for i, j in zip(self.get_joint_current(), start_currents)]
+        r = rospy.Rate(10)
+        while (abs(diff_c[5]) < contact_current \
+               or abs(diff_c[6]) < contact_current) \
+               and not rospy.is_shutdown() \
+               and rospy.Time.now() - start_time < rospy.Duration(close_time):
+            r.sleep()
+            diff_c = [i-j for i, j in zip(self.get_joint_current(), start_currents)]
+        self.set_joint_trajectory(
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            0.01,
+            mask=[1, 1, 1, 1, 1, 0, 0],
+            interpolation_method=self.MINJERK,
+            relative=True
+        )
+        self.wait_interpolation()
+        self.set_joint_trajectory(
+            [0.0, 0.0, 0.0, 0.0, 0.0, close_offset, close_offset],
+            1.0,
+            mask=[1, 1, 1, 1, 1, 0, 0],
+            interpolation_method=self.MINJERK,
+            relative=True
+        )
+        self.wait_interpolation()
+
+    def _get_current_average(self, duration):
+        start = rospy.Time.now()
+        r = rospy.Rate(10)
+        count = 1
+        sum_list = self.get_joint_current()
+        while rospy.Time.now()-start < rospy.Duration(duration):
+            r.sleep()
+            sum_list = [i + j for i, j in zip(sum_list, self.get_joint_current())]
+            count += 1
+        return [i/count for i in sum_list]
