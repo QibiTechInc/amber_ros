@@ -37,7 +37,7 @@
     <param name="gripper_adapt_time" value="0.2"/>
     <param name="follow_mode" value="waypoint" />
     <param name="moveit_control_rate" value="25.0" />
-    <param name="minimum_control_duration" value="1.0" />
+    <param name="minimum_control_duration" value="2.0" />
     <remap from="joint_states" to="/amber_left/joint_states" />
     <remap from="joint_currents" to="/amber_left/joint_currents" />
   </node>
@@ -56,7 +56,7 @@
     <param name="gripper_adapt_time" value="0.2"/>
     <param name="follow_mode" value="waypoint" />
     <param name="moveit_control_rate" value="25.0" />
-    <param name="minimum_control_duration" value="1.0" />
+    <param name="minimum_control_duration" value="2.0" />
     <remap from="joint_states" to="/amber_right/joint_states" />
     <remap from="joint_currents" to="/amber_right/joint_currents" />
   </node>

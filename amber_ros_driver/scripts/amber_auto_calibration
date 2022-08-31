@@ -30,16 +30,16 @@ class AutoCalibration(object):
         for i in range(3):
             self._amber_driver.alarm_reset(i)
 
-        # 制御モード変更, 上腕は電流制御
-        self._amber_driver.set_control_mode([3, 3, 3, 1, 1, 1, 1])
+        # 制御モード変更, J2は速度制御、J3は電流制御
+        self._amber_driver.set_control_mode([1, 2, 3, 1, 1, 1, 1])
 
         # 上腕のサーボオン
         self._amber_driver.servo_on(0)
         self._amber_driver.servo_on(1)
         self._amber_driver.servo_on(2)
 
-        # J2, J3キャリブレーションのために腕を折りたたむ
-        current_j3 = -2.5
+        # J3をキャリブレーションのために折りたたむ
+        current_j3 = -3.0
         self._amber_driver.set_joint_trajectory([0.0,
                                                  0.0,
                                                  current_j3,
@@ -47,34 +47,51 @@ class AutoCalibration(object):
                                                  0.0,
                                                  0.0,
                                                  0.0],
-                                                3.0)
+                                                3.0,
+                                                interpolation_method=AmberDriver.LINEAR,
+                                                mask=[1, 0, 0, 1, 1, 1, 1])
         self._amber_driver.wait_interpolation()
-        current_j2 = 4.0
-        current_j3 = -3.5
-        self._amber_driver.set_joint_trajectory([0.0,
-                                                 current_j2,
-                                                 current_j3,
-                                                 0.0,
-                                                 0.0,
-                                                 0.0,
-                                                 0.0],
-                                                3.0)
-        self._amber_driver.wait_interpolation()
-        time.sleep(1)
-        self._amber_driver.calibrate_joint(1,
-                                           self._calib_list[1])
-        time.sleep(0.5)
-        joint_angle = self._amber_driver.get_joint_angle()
+
+        # J2を速度制御で動かす
+        joint_angle_list = self._amber_driver.move_until_contact(1,
+                                                                 [0, 0.2, 0.0, 0, 0, 0, 0],
+                                                                 6.0,
+                                                                 thres_count=10,
+                                                                 mask=[1, 0, 1, 1, 1, 1, 1])
+        if joint_angle_list is None:
+            print("Auto calibration is Failed!")
+            return
+
+        j2_max = max([x[1] for x in joint_angle_list])
+        self._amber_driver.calibrate_joint_from_memory(1,
+                                                       self._calib_list[1],
+                                                       j2_max)
+
+        # 制御モード変更, J2は電流制御、J3は速度制御
+        self._amber_driver.set_control_mode([1, 3, 2, 1, 1, 1, 1])
+        # J3を速度制御で動かす
+        joint_angle_list = self._amber_driver.move_until_contact(2,
+                                                                 [0, 4.0, -0.2, 0, 0, 0, 0],
+                                                                 3.0,
+                                                                 thres_count=10,
+                                                                 mask=[1, 0, 0, 1, 1, 1, 1])
+        if joint_angle_list is None:
+            print("Auto calibration is Failed!")
+            return
+
+        j3_min = min([x[2] for x in joint_angle_list])
         self._amber_driver.calibrate_joint_from_memory(2,
                                                        self._calib_list[2],
-                                                       joint_angle[2])
-        time.sleep(0.5)
+                                                       j3_min)
 
         # J2, J3をアームレストにゆっくりおろす
-        time.sleep(0.5)
+        # 制御モード変更, J2J3は電流制御
+        self._amber_driver.set_control_mode([1, 3, 3, 1, 1, 1, 1])
+        time.sleep(0.3)
         self._amber_driver.servo_off(0)
+        self._amber_driver.servo_on(3)
         time.sleep(0.1)
-        current_j2 = 2.0
+        current_j2 = 0.5
         current_j3 = -1.0
         self._amber_driver.set_joint_trajectory([0.0,
                                                  current_j2,
@@ -84,29 +101,26 @@ class AutoCalibration(object):
                                                  0.0,
                                                  0.0],
                                                 3.0,
+                                                interpolation_method=AmberDriver.LINEAR,
                                                 mask=[1, 0, 0, 1, 1, 1, 1])
         self._amber_driver.wait_interpolation()
-        self._amber_driver.servo_all_off()
-
+        time.sleep(1.0)
         # J2, J3の姿勢をキャリブレーション位置に変更する
-        self._amber_driver.go_to_home_position(mode=[3, 1, 1, 1, 1, 1, 1])
+        self._amber_driver.go_to_home_position(goal_time=2.0,
+                                               mode=[2, 1, 1, 1, 1, 1, 1],
+                                               mask=[1, 0, 0, 0, 0, 0, 0])
+        time.sleep(1.0)
 
         # J1キャリブレーション
         if self._lr == 'r':
-            current_j1 = 1.0
+            speed_j1 = 0.2
         else:
-            current_j1 = -1.0
-        self._amber_driver.set_joint_trajectory([current_j1,
-                                                 0.0,
-                                                 0.0,
-                                                 0.0,
-                                                 0.0,
-                                                 0.0,
-                                                 0.0],
-                                                3.0,
-                                                mask=[0, 1, 1, 1, 1, 1, 1])
-        self._amber_driver.wait_interpolation()
-        time.sleep(1)
+            speed_j1 = -0.2
+        self._amber_driver.move_until_contact(0,
+                                              [speed_j1, 0.0, 0.0, 0, 0, 0, 0],
+                                              5.0,
+                                              thres_count=10,
+                                              mask=[0, 1, 1, 1, 1, 1, 1])
         self._amber_driver.calibrate_joint(0, self._calib_list[0])
         time.sleep(0.5)
 
