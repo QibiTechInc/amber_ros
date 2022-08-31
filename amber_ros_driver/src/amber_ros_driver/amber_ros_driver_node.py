@@ -57,6 +57,7 @@ class AmberROSDriverNode(object):
         rospy.Service('get_control_mode', GetInt8Array, self.handle_get_control_mode)
         rospy.Service('set_joint_trajectory', SetJointTrajectory, self.handle_set_joint_trajectory)
         rospy.Service('enable_zerog_mode', SetBool, self.handle_enable_zerog_mode)
+        rospy.Service('grasp', Empty, self.handle_grasp)
 
     def shutdown(self):
         self._amber_driver.close_device()
@@ -119,6 +120,10 @@ class AmberROSDriverNode(object):
     def handle_enable_zerog_mode(self, req):
         self._amber_driver.enable_zerog_mode(req.data)
         return SetBoolResponse(success=True, message='')
+
+    def handle_grasp(self, req):
+        self._amber_driver.close_hand_until_contact()
+        return EmptyResponse()
 
     def publish_joint_state(self, angles, velocities, efforts):
         js = JointState()
